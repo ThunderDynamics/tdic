@@ -1,87 +1,146 @@
 {% extends 'layout.html' %}
-{% from 'macros.html' import render_avatar %}
+{% from 'macros.html' import render_avatar, render_form %}
 
 {% block body %}
-<div class='container'>
+{% if form %}
+{% if form.errors %}
+<script>
+	$(document).ready(function(){
+          $('#post').modal('open');
+        });
+</script>
+{% endif %}
+{% endif %}
+<div class='container white-text'>
 	{% if user %}
-		<h3 style='margin-top: 5%'>{{ render_avatar(user.avatar) }}{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</h3>
+		<div class="row">
+			<h3 class="col s12">{{ render_avatar(user.avatar) }}{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</h3>
+		</div>
 		<div class='row'>
-			<p class='four columns'>Joined on {{ user.joined_at.strftime('%A, %B %d at %I:%M %p') }}</p>
-			<p class='three columns'>Following: {{ user.relations.count() }}</p>
-			<p class='three columns'>Followers: {{ user.relations_to.count() }}</p>
+			<p class='col s4'>Joined on {{ user.joined_at.strftime('%A, %B %d at %I:%M %p') }}</p>
+			<p class='col s3'>Following: {{ user.relations.count() }}</p>
+			<p class='col s3'>Followers: {{ user.relations_to.count() }}</p>
 			{% if user != g.user._get_current_object() %}
 				{% if user not in current_user.following() %}
-					<a href='{{ url_for('follow', username=user.username) }}' class='two columns button'>Follow</a>
+					<a href="{{ url_for('follow', username=user.username) }}" class='col s2 btn blue waves-effect waves-light'>Follow</a>
 				{% else %}
-					<a href='{{ url_for('unfollow', username=user.username) }}' class='two columns button'>Unfollow</a>
+					<a href="{{ url_for('unfollow', username=user.username) }}" class='col s2 btn blue waves-effect waves-light'>Unfollow</a>
 				{% endif %}
 			{% endif %}
 		</div>
-		<p>Bio: {{ user.bio }}</p>
+		<div class="row">
+			<p class="col s12">Bio: {{ user.bio }}</p>
+		</div>
 	{% endif %}
-	{% if posts %}
-        <h2>Posts</h2>
-		{% for post in posts %}
-			<div class='post'>
-				<div class='row'>
-					{% if not user %}
-					<div class='one columns'>{{ render_avatar(post.user.avatar, '50') }}</div>
-					<h3 class='six columns'><a href='{{ url_for('user_view', username=post.user.username) }}' style='text-decoration:none; color:black; float:left; text-align:left'>{{ post.user.username }}</a></h3>{% endif %}
-					<h5 class='five columns' {% if not user %}style='text-align:right'{% endif %}>{{ post.created_at.strftime('%A, %B %d at %I:%M %p') }}</h3>
-				</div>
-				<div class='row'>
-					<a href='{{ url_for('view_post', id=post.id) }}' class='twelve columns'>View Post</a>
-				</div>
-				<br>
-				<div class='row'>
-					<p style='twelve columns'>{{ post.data }}</p>
-				</div>
-				{% if post.comments %}
-					<h5>Comments</h5>
-					{% for comment in post.comments %}
-						<div class=row style='margin: 5px'>
-							<a href='{{ url_for('user_view', username=comment.user.username) }}' style='display:inline'>{{ comment.user.username }}</a>
-							<h6 style='display:inline'>{{ comment.created_at.strftime('%A, %B %d at %I:%M %p') }}</h6>
-							<p style='display:inline'>{{ comment.data }}</p>
+	{% if current_user.is_authenticated %}
+		{% if posts %}
+		<h2 class="white-text">Feed</h2>
+		<div class="row">
+			{% for post in posts %}
+				<div class="col s12 m6 l4">
+					<div class="card medium">
+						<div class="card-content black-text">
+							<span class="card-title">{{ render_avatar(post.user.avatar, '75') }}
+								<a style="margin-left: 10px;" href="{{ url_for('user_view', username=post.user.username) }}" class="black-text">{{ post.user.username }}</a>
+							</span>
+							<p>{{ post.created_at.strftime('%A, %B %d at %I:%M %p') }}</p><br>
+							<p>{{ post.data }}</p>
 						</div>
-					{% endfor %}
-				{% endif %}
-				<div class='row'>
-					<form method=POST action='/comment/{{ post.id }}'>
-						<input type=text placeholder='Comment' name='comment'></input>
-					</form>
+						<div class="card-action">
+							<a class="waves-effect waves-light btn-floating secondary-content white btn-large" href="#modalpost{{ post.id }}">
+								<i class="material-icons black-text">comment</i></a>
+							<span style="margin-top:15px; margin-right: 10px;" class="new badge blue" data-badge-caption="">{{ post.comments.count() }}</span>
+						</div>
+						<div id="modalpost{{ post.id }}" class="modal modal-fixed-footer">
+							<div class="modal-content">
+								<h4 class="black-text fixed"><i class="material-icons black-text">comment</i> Comments</h4>
+								{% if post.comments %}
+								<ul class="collection">
+									{% for comment in post.comments %}
+										<li class="collection-item avatar">
+										  {{ render_avatar(comment.user.avatar, '50') }}
+										  <a href="{{ url_for('user_view', username=comment.user.username) }}" class="title black-text">{{ comment.user.username }}</a>
+											<p class="black-text"><b class="black-text">{{ comment.created_at.strftime('%A, %B %d at %I:%M %p') }}</b>: {{ comment.data }}</p>
+										</li>
+									{% endfor %}
+								</ul>
+								{% else %}
+								<h6 class="black-text">No Comments</h6>
+								{% endif %}
+							</div>
+							<div class="modal-footer">
+								<a href="#!" style="margin-left: 10px;" class="modal-action modal-close waves-effect btn-flat">Close</a>
+								<a class="waves-effect waves-light btn-floating secondary-content red btn" href="#modalpostcomment{{ post.id }}">
+									<i class="material-icons">add</i></a>
+							</div>
+						</div>
+						<div id="modalpostcomment{{ post.id }}" class="modal">
+							<div class="modal-content">
+								<h4 class="black-text fixed"><i class="material-icons black-text">add</i> Add Comment</h4>
+								<form action='/comment/{{ post.id }}' method='POST'>
+									<div class="input-field">
+										<input type="text" placeholder='Comment' name='comment' id="comment" class="black-text" data-length="140">
+										<label class="label-icon" for="comment"></label>
+										<button class="btn waves-effect waves-light blue" type="submit" name="action">Submit</button>
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<a href="#!" class="modal-action modal-close waves-effect btn-flat">Cancel</a>
+							</div>
+						</div>
+					</div>
 				</div>
+			{% endfor %}
 			</div>
-		{% endfor %}
-		{% if options %}
-			<p>Currently showing 20 posts per page</p>
-			<a href='/{{ page - 1 }}'> << Previous Page</a>
-			{{ page }}
-			<a href='/{{ page + 1 }}'>Next Page >></a>
-		{% endif %}
-	{% else %}
-		{% if current_user.is_authenticated %}
-			<h3>Nothing here!</h3>
-			{% if options %}
-				<p>Currently showing 20 posts per page</p>
-				<a href='/{{ page - 1 }}'> << Previous Page</a>
-				{{ page }}
-				<a href='/{{ page + 1 }}'>Next Page >></a>
-				<br>
-				<br>
-				<br>
-			{% endif %}
 		{% else %}
-			<h3>Thunder Dynamics Internal Communication (TDIC)</h3>
-			<p>Notice: This site uses cookies to login the user.</p>
-			<h4>Major notices and announcements: </h4>
-			<ul>
-				<li>Added "special password" feature</li>
-				<li>Forced HTTPS using redirect</li>
-				<li>Better top bar UI</li>
-                <li>Ability to turn off email notifications</li>
+		<h3 class="white-text">Nothing here!</h3>
+		{% endif %}
+		{% if options %}
+			<br>
+			<br>
+			<p class="white-text">Currently showing 21 posts per page</p>
+			<ul class="pagination">
+				<li class="{% if page == 1 %}disabled{% else %}waves-effect{% endif %}">
+					<a {% if page == 1 %} # {% else %} href="/{{ page - 1 }}" {% endif %}>
+					<i class="material-icons">chevron_left</i></a></li>
+				<li class="active blue"><a href="#!">{{ page }}</a></li>
+				{% if posts %}
+				<li class="waves-effect">
+					<a href="/{{ page + 1 }}">
+					<i class="material-icons">chevron_right</i></a></li>
+				{% else %}
+				<li class="disabled">
+					<a href="#">
+					<i class="material-icons">chevron_right</i></a></li>
+				{% endif %}
 			</ul>
 		{% endif %}
+		{% if not user %}
+		<div class="fixed-action-btn">
+		<a href="#post" class="btn-floating btn-large red waves-effect waves-light">
+		  <i class="material-icons large">mode_edit</i>
+		</a>
+		</div>
+		{% endif %}
+		<div id="post" class="modal modal-fixed-footer">
+			<div class="modal-content">
+				<h4 class="black-text fixed"><i class="material-icons black-text">add</i> Add Post</h4>
+				{{ render_form(form, 'Submit') }}
+			</div>
+			<div class="modal-footer">
+				<a href="#!" class="modal-action modal-close waves-effect btn-flat">Cancel</a>
+			</div>
+		</div>
+	{% else %}
+	<div class="white-text">
+		<h3>Thunder Dynamics Internal Communication (TDIC)</h3>
+		<p>Notice: This site uses cookies to login the user.</p>
+		<h4>Major notices and announcements: </h4>
+		<ul>
+			<li>NEW UI!</li>
+		</ul>
+	</div>
 	{% endif %}
 </div>
 {% endblock %}

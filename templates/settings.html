@@ -1,18 +1,63 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class=container>
-	<form method='POST' enctype='multipart/form-data'>
-		<h3 style="color: white">Set bio (Up to 255 chars)</h3>
-		<textarea name=bio style='width:100%' placeholder='Current bio: {{ g.user._get_current_object().bio }}'></textarea>
-		<h3 style="color: white">Set avatar (Up to 3mb)</h3>
-		<input type=file class=button name=avatar></input><br><br>
-	        <h3 style="color: white">Toggle Emails</h3>
-	        <input type=checkbox name=email {% if g.user.default_view != 'noemail' %} checked {% endif %}/>
-	        <br>
-		<input type='submit' class='button-primary'></input>
-	</form>
-	<a href='{{ url_for('sign_in', action='delete_account') }}' class='button', style='background-color: red; color:white'>DELETE ACCOUNT</a>
-	<p>Warning: This action cannot be reversed.</p>
+<div class="container">
+	<div class="card">
+        <div class="card-content">
+            <div class="row">
+                <form method='POST' enctype='multipart/form-data' class="col s12">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <label for="bio">Set bio (Up to 255 chars)</label>
+                            <textarea name="bio"
+                                      placeholder='Current bio: {{ g.user._get_current_object().bio }}'
+                                      id="bio" class="materialize-textarea black-text"
+                                      data-length="255"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <p class="grey-text">Set avatar (Up to 3mb)</p>
+                            <div class="file-field input-field">
+                              <div class="btn blue waves-effect waves-light">
+                                <span>File</span>
+                                <input type="file" name="avatar" id="avatar">
+                              </div>
+                              <div class="file-path-wrapper">
+                                <input class="file-path validate black-text" type="text">
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            {% if email %}
+                            <input type="checkbox" id="email" name="email" checked="checked">
+                            <label for="email">Email notifications</label>
+                            {% else %}
+                            <input type="checkbox" id="email" name="email">
+                            <label for="email">Email notifications</label>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <br><br>
+                    <div class="row">
+                        <div class="col s12">
+                            <input type='submit' class='btn blue waves-effect waves-light'>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="row">
+                <div class="col s12">
+                    <a href="{{ url_for('sign_in', action='delete_account') }}" class='btn red waves-effect waves-light'>DELETE ACCOUNT</a>
+                    <p class="black-text">Warning: This action cannot be reversed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

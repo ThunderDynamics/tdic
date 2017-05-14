@@ -1,3 +1,12 @@
 {% from 'macros.html' import render_form %}
 {% extends 'layout.html' %}
-{% block body %}{{ render_form(form, 'Sign Up', 'Sign Up!') }}{% endblock %}
+{% block body %}
+<div class="container">
+    <div class="card">
+        <div class="card-content">
+            <h3 class="black-text">Sign Up</h3>
+            {{ render_form(form, 'Sign Up') }}
+        </div>
+    </div>
+</div>
+{% endblock %}

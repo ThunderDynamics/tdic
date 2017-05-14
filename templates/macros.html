@@ -1,23 +1,29 @@
-{% macro render_form(form, header, button) %}
-	<form method='POST' class=container style='margin-top: 5%; color: white;'>
-		<h2 style="color:white;">{{ header }}</h2>
+{% macro render_form(form, button) %}
+	<form method='POST'>
+
 		{% for field in form %}
-		    <div class=row>
-		        {% if field.errors %}
-		            {% for error in field.errors %}
-		                <div class='twelve columns errorfield'>{{ error }}</div>
-		            {% endfor %}
-		        {% endif %}
-				{% if field.type == 'BooleanField' %}
-					<span style="color: white;">{{ field.label }}<span>
-				{% endif %}
-				{{ field(placeholder=field.label.text, class='twelve columns') }}
-		    </div>
+        <div class="input-field">
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <p class="red-text" style="font-size: 11px;">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            {% if field.type == 'TextAreaField' %}
+                {{ field(class='materialize-textarea black-text', **{'data-length': '255'}) }}
+            {% else %}
+                {{ field(class='black-text') }}
+            {% endif %}
+            {% if field.type != 'CSRFTokenField' %}
+                <label for="{{ field.id }}">{{ field.label.text }}</label>
+            {% endif %}
+
+        </div>
 		{% endfor %}
-		<button type=submit class='button-primary'>{{ button }}</button>
+        <button class="btn waves-effect waves-light blue" type="submit" name="action"
+                style="margin-top:40px;">{{ button }}</button>
 	</form>
 {% endmacro %}
 
 {% macro render_avatar(avatar, size='100') %}
-	<img src='{{ avatar }}' style='border-radius:50%; width: {{ size }}px; height: {{ size }}px;'></img>
+	<img src='{{ avatar }}' style='border-radius:50%; width: {{ size }}px; height: {{ size }}px;'>
 {% endmacro %}

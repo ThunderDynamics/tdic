@@ -50,13 +50,26 @@ def load_user(id):
         return None
 
 
-@app.route('/')
-@app.route('/<int:page>')
+@app.route('/', methods=('GET', 'POST'))
+@app.route('/<int:page>', methods=('GET', 'POST'))
 def index(page=1):
     posts = None
+    form = PostForm()
+    if form.validate_on_submit():
+        post_create = Post.create(user=g.user.id, data=form.content.data)
+        for user in User.select():
+            user.sendmail_to(name=g.user.username,
+                             subject="TDIC Post",
+                             msg_text='{} posted: "{}".'
+                             .format(g.user.username, form.content.data),
+                             link=url_for("view_post", id=post_create.id)
+                             )
+
+        flash('Posted!')
+        return redirect(url_for('index'))
     if current_user.is_authenticated:
-        posts = Post.select().paginate(page, 20)
-    return render_template('index.html', posts=posts, page=page)
+        posts = Post.select().paginate(page, 21)
+    return render_template('index.html', posts=posts, page=page, options=True, form=form)
 
 
 @app.route('/comment/<int:id>', methods=['POST'])
@@ -149,25 +162,6 @@ def sign_out():
     return redirect(url_for('index'))
 
 
-@app.route('/post', methods=['GET', 'POST'])
-@login_required
-def post():
-    form = PostForm()
-    if form.validate_on_submit():
-        post_create = Post.create(user=g.user.id, data=form.content.data)
-        for user in User.select():
-            user.sendmail_to(name=g.user.username,
-                             subject="TDIC Post",
-                             msg_text='{} posted: "{}".'
-                             .format(g.user.username, form.content.data),
-                             link=url_for("view_post", id=post_create.id)
-                             )
-
-        flash('Posted!')
-        return redirect(url_for('index'))
-    return render_template('post.html', form=form)
-
-
 @app.route('/user')
 @app.route('/user/<username>')
 @login_required
@@ -195,9 +189,10 @@ def follow(username):
         abort(406)
     else:
         try:
-            Relationship.get(Relationship.from_user == g.user, Relationship.to_user == user)
+            Relationship.get(Relationship.from_user == g.user._get_current_object(),
+                             Relationship.to_user == user)
         except DoesNotExist:
-            Relationship.create(from_user=g.user, to_user=user)
+            Relationship.create(from_user=g.user._get_current_object(), to_user=user)
             flash('Followed {}!'.format(user.username))
             return redirect(url_for('user_view', username=user.username))
         else:
@@ -214,7 +209,7 @@ def unfollow(username):
         abort(406)
     else:
         try:
-            relation = Relationship.get(Relationship.from_user == g.user,
+            relation = Relationship.get(Relationship.from_user == g.user._get_current_object(),
                                         Relationship.to_user == user)
         except DoesNotExist:
             flash('You haven\'t followed {} yet.'.format(user.username))
@@ -260,7 +255,7 @@ def settings():
                 user.default_view = 'email'
                 user.save()
                 flash('Email enabled.')
-    return render_template('settings.html')
+    return render_template('settings.html', email=(g.user.default_view != 'noemail'))
 
 
 @app.route('/delete_account')
