@@ -56,7 +56,14 @@ def index(page=1):
     posts = None
     form = PostForm()
     if form.validate_on_submit():
-        post_create = Post.create(user=g.user.id, data=form.content.data)
+        file_u = request.files['image'].read()
+        if request.files['image']:
+            file_a = 'data:{};base64,{}'.format(request.files['image'].content_type,
+                                                encode(file_u, 'base64').decode('utf-8'))
+            post_create = Post.create(user=g.user.id, data=form.content.data, image=file_a)
+        else:
+            post_create = Post.create(user=g.user.id, data=form.content.data)
+
         for user in User.select():
             user.sendmail_to(name=g.user.username,
                              subject="TDIC Post",
@@ -64,9 +71,7 @@ def index(page=1):
                              .format(g.user.username, form.content.data),
                              link=url_for("view_post", id=post_create.id)
                              )
-
         flash('Posted!')
-        return redirect(url_for('index'))
     if current_user.is_authenticated:
         posts = Post.select().paginate(page, 21)
     return render_template('index.html', posts=posts, page=page, options=True, form=form)

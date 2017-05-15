@@ -1,8 +1,11 @@
 import os
+from base64 import encode
+
+from sys import getsizeof
 
 import models
 from flask_wtf import Form
-from wtforms import StringField, PasswordField, TextAreaField, BooleanField
+from wtforms import StringField, PasswordField, TextAreaField, BooleanField, FileField
 from wtforms.validators import ValidationError, DataRequired, regexp, Email, EqualTo, Length
 from flask_bcrypt import check_password_hash
 
@@ -34,10 +37,27 @@ def email_exists(form, field):
 
 def auth_matches(form, field):
     print(form)
-    if check_password_hash(AUTH_PASS, field.data):
-        pass
+    if 'HEROKU' in os.environ:
+        if check_password_hash(AUTH_PASS, field.data):
+            pass
+        else:
+            raise ValidationError('Special Password Incorrect')
+
+
+def valid_image(form, field):
+    print(form)
+    if field.data:
+        ext = os.path.splitext(field.data.filename)[1].strip(".")
+        if ext in ['jpeg', 'jpg', 'png', 'psd', 'gif', 'bmp', 'exif', 'tif', 'tiff']:
+            file_u = field.data
+            if getsizeof(file_u) <= 3000000:
+                pass
+            else:
+                raise ValidationError('Avatar is bigger than 3 mb.')
+        else:
+            raise ValidationError('Avatar is not an image.')
     else:
-        raise ValidationError('Special Password Incorrect')
+        pass
 
 
 class SignUpForm(Form):
@@ -102,3 +122,4 @@ class SignInForm(Form):
 
 class PostForm(Form):
     content = TextAreaField('What do you have to say?', validators=[Length(1, 255)])
+    image = FileField('Optional Image', validators=[valid_image])

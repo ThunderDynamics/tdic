@@ -38,8 +38,13 @@
 		<div class="row">
 			{% for post in posts %}
 				<div class="col s12 m6 l4">
-					<div class="card medium">
-						<div class="card-content black-text" style="overflow-y: auto; padding-bottom: 6.5em;">
+					<div class="card large">
+						{% if post.image %}
+						<div class="card-image">
+							<a href="#modalimage{{ post.id }}"><img height="150px" style="object-fit: cover;" src="{{ post.image }}" /></a>
+						</div>
+						{% endif %}
+						<div class="card-content black-text" style="overflow-y: auto; padding-bottom: 1.25em;">
 							<span class="card-title">{{ render_avatar(post.user.avatar, '75') }}
 								<a style="margin-left: 10px;" href="{{ url_for('user_view', username=post.user.username) }}" class="black-text">{{ post.user.username }}</a>
 							</span>
@@ -74,6 +79,16 @@
 									<i class="material-icons">add</i></a>
 							</div>
 						</div>
+						{% if post.image %}
+						<div id="modalimage{{ post.id }}" class="modal modal-fixed-footer">
+							<div class="modal-content">
+								<img width="100%" height="95%" style="object-fit: contain" src="{{ post.image }}">
+							</div>
+							<div class="modal-footer">
+								<a href="#!" class="modal-action modal-close waves-effect btn-flat">Close</a>
+							</div>
+						</div>
+						{% endif %}
 						<div id="modalpostcomment{{ post.id }}" class="modal">
 							<div class="modal-content">
 								<h4 class="black-text fixed"><i class="material-icons black-text">add</i> Add Comment</h4>
@@ -139,6 +154,7 @@
 		<h4>Major notices and announcements: </h4>
 		<ul>
 			<li>NEW UI!</li>
+			<li>Images in posts!</li>
 		</ul>
 	</div>
 	{% endif %}

@@ -100,6 +100,7 @@ class Post(Model):
     user = ForeignKeyField(User, related_name='posts')
     data = TextField()
     created_at = DateTimeField(default=datetime.datetime.now)
+    image = TextField(null=True)
 
     def get_comments(self):
         Comment.select().where(Comment.post == self)
