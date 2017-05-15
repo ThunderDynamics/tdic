@@ -39,7 +39,7 @@
 			{% for post in posts %}
 				<div class="col s12 m6 l4">
 					<div class="card medium">
-						<div class="card-content black-text">
+						<div class="card-content black-text" style="overflow-y: auto;">
 							<span class="card-title">{{ render_avatar(post.user.avatar, '75') }}
 								<a style="margin-left: 10px;" href="{{ url_for('user_view', username=post.user.username) }}" class="black-text">{{ post.user.username }}</a>
 							</span>
