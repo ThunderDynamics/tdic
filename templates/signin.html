@@ -1,11 +1,10 @@
 {% extends 'layout.html' %}
 {% from 'macros.html' import render_form %}
-{% if text %}{% set text = 'Sign In to ' + text %}{% else %}{% set text = 'Sign In' %}{% endif %}
 {% block body %}
 <div class="container">
     <div class="card">
         <div class="card-content">
-            <h3 class="black-text">Sign In</h3>
+            <h3 class="black-text">{% if text %}Verify Your Account{% else %}Sign In{% endif %}</h3>
             {{ render_form(form, 'Sign In') }}
         </div>
     </div>
