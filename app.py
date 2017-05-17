@@ -4,6 +4,7 @@ from re import sub
 from codecs import encode
 from sys import getsizeof
 
+from peewee import InternalError
 from werkzeug.routing import BuildError
 
 from forms import SignUpForm, PostForm, SignInForm
@@ -72,8 +73,11 @@ def index(page=1):
                              link=url_for("view_post", id=post_create.id)
                              )
         flash('Posted!')
-    if current_user.is_authenticated:
-        posts = Post.select().paginate(page, 21)
+    try:
+        if current_user.is_authenticated:
+            posts = Post.select().paginate(page, 21)
+    except InternalError:
+        DB.rollback()
     return render_template('index.html', posts=posts, page=page, options=True, form=form)
 
 
