@@ -7,7 +7,6 @@ from peewee import *
 from flask_bcrypt import generate_password_hash
 from flask_login import UserMixin
 from email.mime.text import MIMEText
-from playhouse.migrate import *
 
 DB = Proxy()
 
@@ -158,13 +157,6 @@ if 'HEROKU' in os.environ:
                                 port=url.port, fields={'list': 'text'})
     PostgresqlDatabase.register_fields({'list': 'text'})
     DB.initialize(db_sql)
-    migrator = PostgresqlMigrator(DB)
-    likes = ListField(default=[])
-    dislikes = ListField(default=[])
-    migrate(
-        migrator.add_column('post', 'likes', likes),
-        migrator.add_column('post', 'dislikes', dislikes)
-    )
 else:
     db_sql = SqliteDatabase('DB', fields={'list': 'list'})
     SqliteDatabase.register_fields({'list': 'list'})
