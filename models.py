@@ -4,6 +4,7 @@ import ast
 from urllib.parse import urlparse, uses_netloc
 import smtplib
 from peewee import *
+from peewee import transaction
 from flask_bcrypt import generate_password_hash
 from flask_login import UserMixin
 from email.mime.text import MIMEText
@@ -157,6 +158,7 @@ if 'HEROKU' in os.environ:
                                 port=url.port, fields={'list': 'text'})
     PostgresqlDatabase.register_fields({'list': 'text'})
     DB.initialize(db_sql)
+    transaction(DB).rollback()
 else:
     db_sql = SqliteDatabase('DB', fields={'list': 'list'})
     SqliteDatabase.register_fields({'list': 'list'})
