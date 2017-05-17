@@ -155,8 +155,8 @@ if 'HEROKU' in os.environ:
     uses_netloc.append('postgres')
     url = urlparse(os.environ["DATABASE_URL"])
     db_sql = PostgresqlDatabase(database=url.path[1:], user=url.username, password=url.password, host=url.hostname, 
-                                port=url.port, fields={'list': 'list'})
-    PostgresqlDatabase.register_fields({'list': 'list'})
+                                port=url.port, fields={'list': 'text'})
+    PostgresqlDatabase.register_fields({'list': 'text'})
     DB.initialize(db_sql)
     migrator = PostgresqlMigrator(DB)
     likes = ListField(default=[])
