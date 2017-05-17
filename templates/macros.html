@@ -36,5 +36,5 @@
 {% endmacro %}
 
 {% macro render_avatar(avatar, size='100') %}
-	<img src='{{ avatar }}' style='border-radius:50%; width: {{ size }}px; height: {{ size }}px;'>
+	<img src='{{ avatar }}' style="border-radius:50%; width: {{ size }}px; height: {{ size }}px; object-fit: cover;" />
 {% endmacro %}

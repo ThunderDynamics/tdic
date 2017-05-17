@@ -1,5 +1,6 @@
 import datetime
 import os
+import ast
 from urllib.parse import urlparse, uses_netloc
 import smtplib
 from peewee import *
@@ -8,6 +9,16 @@ from flask_login import UserMixin
 from email.mime.text import MIMEText
 
 DB = Proxy()
+
+
+class ListField(Field):
+    db_field = 'list'
+
+    def db_value(self, value):
+        return str(value)
+
+    def python_value(self, value):
+        return ast.literal_eval(value)
 
 
 class User(UserMixin, Model):
@@ -40,7 +51,7 @@ class User(UserMixin, Model):
                                'wAAAAAAAAAAAAAAAAAAAAAAADK6mAB//2Q==')
     joined_at = DateTimeField(default=datetime.datetime.now)
     bio = TextField(default='This person has not set a bio yet. Shame on that person.')
-    default_view = CharField(default='following')
+    email_enabled = CharField(default='email')
 
     def __str__(self):
         return self.username
@@ -77,7 +88,7 @@ class User(UserMixin, Model):
 
     def sendmail_to(self, subject, msg_text, name="TDIC", link=None):
         if 'HEROKU' in os.environ:
-            if self.default_view != 'noemail':
+            if self.email_enabled != 'noemail':
                 print(name)
                 smtp = smtplib.SMTP_SSL('smtp.gmail.com')
                 smtp.login('thethunderdynamics@gmail.com', os.environ['email_pass'])
@@ -101,6 +112,8 @@ class Post(Model):
     data = TextField()
     created_at = DateTimeField(default=datetime.datetime.now)
     image = TextField(null=True)
+    likes = ListField(default=[])
+    dislikes = ListField(default=[])
 
     def get_comments(self):
         Comment.select().where(Comment.post == self)
@@ -141,10 +154,12 @@ if 'HEROKU' in os.environ:
     uses_netloc.append('postgres')
     url = urlparse(os.environ["DATABASE_URL"])
     db_sql = PostgresqlDatabase(database=url.path[1:], user=url.username, password=url.password, host=url.hostname, 
-                                port=url.port)
+                                port=url.port, fields={'list': 'list'})
+    PostgresqlDatabase.register_fields({'list': 'list'})
     DB.initialize(db_sql)
 else:
-    db_sql = SqliteDatabase('DB')
+    db_sql = SqliteDatabase('DB', fields={'list': 'list'})
+    SqliteDatabase.register_fields({'list': 'list'})
     DB.initialize(db_sql)
 
 

@@ -13,29 +13,29 @@ from werkzeug.exceptions import BadRequest
 from flask import Flask, flash, redirect, url_for, render_template, g, abort, request
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from flask_bcrypt import check_password_hash
-from flask_admin import Admin
-from flask_admin.contrib.peewee import ModelView
+# from flask_admin import Admin
+# from flask_admin.contrib.peewee import ModelView
 
 
 app = Flask(__name__)
 app.secret_key = 'gb5;w85uigb4hp89g 5ubg8959gb5g9p891234567gfvhytrdgfjdfgd5c56d566576tyvyfyftfyttytyftf'
 
 
-class AuthView(ModelView):
-    column_exclude_list = ('avatar', 'password')
-    form_excluded_columns = ['email']
-
-    def is_accessible(self):
-        if 'HEROKU' in environ:
-            return current_user.is_authenticated and (g.user.username == environ['admin'])
-        else:
-            return current_user.is_authenticated
-
-admin = Admin(app, name='TDIC')
-admin.add_view(AuthView(User, 'User'))
-admin.add_view(AuthView(Post, 'Post'))
-admin.add_view(AuthView(Comment, 'Comment'))
-admin.add_view(AuthView(Relationship, 'Relationship'))
+# class AuthView(ModelView):
+#     column_exclude_list = ('avatar', 'password', 'email_enabled')
+#     form_excluded_columns = ['email']
+#
+#     def is_accessible(self):
+#         if 'HEROKU' in environ:
+#             return current_user.is_authenticated and (g.user.username == environ['admin'])
+#         else:
+#             return current_user.is_authenticated
+#
+# admin = Admin(app, name='TDIC')
+# admin.add_view(AuthView(User, 'User'))
+# admin.add_view(AuthView(Post, 'Post'))
+# admin.add_view(AuthView(Comment, 'Comment'))
+# admin.add_view(AuthView(Relationship, 'Relationship'))
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -225,6 +225,44 @@ def unfollow(username):
             return redirect(url_for('user_view', username=user.username))
 
 
+@app.route('/like/<int:id>')
+@login_required
+def like(id):
+    try:
+        post = Post.get(Post.id == id)
+    except DoesNotExist:
+        abort(404)
+    else:
+        if g.user.id in post.likes:
+            flash("You already liked this.")
+        else:
+            if g.user.id in post.dislikes:
+                post.dislikes.remove(g.user.id)
+            post.likes.append(g.user.id)
+            flash('Liked!')
+        post.save()
+        return redirect('/')
+
+
+@app.route('/dislike/<int:id>')
+@login_required
+def dislike(id):
+    try:
+        post = Post.get(Post.id == id)
+    except DoesNotExist:
+        abort(404)
+    else:
+        if g.user.id in post.dislikes:
+            flash("You already disliked this.")
+        else:
+            if g.user.id in post.likes:
+                post.likes.remove(g.user.id)
+            post.dislikes.append(g.user.id)
+            flash('Disliked!')
+        post.save()
+        return redirect('/')
+
+
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
@@ -251,16 +289,16 @@ def settings():
             else:
                 flash('Avatar is not an image.')
         if 'email' not in request.form:
-            if user.default_view != 'noemail':
+            if user.email_enabled != 'noemail':
                 user.default_view = 'noemail'
                 user.save()
                 flash('Email turned off.')
         elif 'email' in request.form:
-            if user.default_view == 'noemail':
-                user.default_view = 'email'
+            if user.email_enabled == 'noemail':
+                user.email_enabled = 'email'
                 user.save()
                 flash('Email enabled.')
-    return render_template('settings.html', email=(g.user.default_view != 'noemail'))
+    return render_template('settings.html', email=(g.user.email_enabled != 'noemail'))
 
 
 @app.route('/delete_account')
