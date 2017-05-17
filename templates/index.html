@@ -54,19 +54,19 @@
 						<div class="card-action valign-wrapper">
 							<a class="waves-effect waves-light
 							btn-floating secondary-content
-							white btn-large tooltipped margin-right" data-position="bottom"
+							white btn-large tooltipped margin-right" data-position="bottom" data-delay="0"
 						    data-tooltip="{{ post.comments.count() }}" href="#modalpost{{ post.id }}">
 								<i class="material-icons black-text">comment</i></a>
 
 							<a class="waves-effect waves-light
 							btn-floating secondary-content
-							white btn-small tooltipped margin-right" data-position="bottom"
+							white btn-small tooltipped margin-right" data-position="bottom" data-delay="0"
 						    data-tooltip="{{ post.likes|count }}" href="/like/{{ post.id }}">
 								<i class="material-icons black-text">thumb_up</i></a>
 
 							<a class="waves-effect waves-light
 							btn-floating secondary-content
-							white btn-small tooltipped margin-right" data-position="bottom"
+							white btn-small tooltipped margin-right" data-position="bottom" data-delay="0"
 						    data-tooltip="{{ post.dislikes|count }}" href="/dislike/{{ post.id }}">
 								<i class="material-icons black-text">thumb_down</i></a>
 
