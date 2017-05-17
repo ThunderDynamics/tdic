@@ -23,6 +23,10 @@
           $(".button-collapse").sideNav();
           $('.modal').modal();
         });
+        $('a').click(function() {
+            window.location.href = this.href;
+            return false;
+        });
         </script>
         <style>
             * {
