@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import base64
 from os import environ
 from re import sub
 from codecs import encode
@@ -14,6 +15,7 @@ from werkzeug.exceptions import BadRequest
 from flask import Flask, flash, redirect, url_for, render_template, g, abort, request
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from flask_bcrypt import check_password_hash
+from data_uri import DataURI
 # from flask_admin import Admin
 # from flask_admin.contrib.peewee import ModelView
 
@@ -323,6 +325,28 @@ def view_post(id):
         abort(404)
     else:
         return render_template('index.html', posts=[viewed_post])
+
+
+@app.route('/lazy/<content>/<int:id>')
+@login_required
+def lazy(content, id):
+    if content == 'avatar':
+        try:
+            user = User.get(User.id == id)
+        except DoesNotExist:
+            abort(406)
+        else:
+            return base64.decodebytes(str.encode(DataURI(user.avatar).data))
+    elif content == 'post':
+        try:
+            post = Post.get(Post.id == id)
+        except DoesNotExist:
+            abort(404)
+        else:
+            if post.image:
+                return base64.decodebytes(str.encode(DataURI(post.image).data))
+    else:
+        abort(404)
 
 
 @app.errorhandler(404)
