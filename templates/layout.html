@@ -27,7 +27,11 @@
 
         $(document).ready(function(){
         addToHomescreen();
-        $('.lazy').lazy();
+        $('.lazy').lazy({
+            effect: "fadeIn",
+            effectTime: 2000,
+            threshold: 0
+        });
         $('.parallax').parallax();
         $(".button-collapse").sideNav();
         $('.modal').modal();
