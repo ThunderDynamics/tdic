@@ -29,12 +29,13 @@
         addToHomescreen();
         $('.lazy').lazy({
             effect: "fadeIn",
-            effectTime: 2000,
+            effectTime: 500,
             threshold: 0
         });
         $('.parallax').parallax();
         $(".button-collapse").sideNav();
         $('.modal').modal();
+        $('.materialboxed').materialbox();
         });
         if(("standalone" in window.navigator) && window.navigator.standalone){
             var noddy, remotes = false;

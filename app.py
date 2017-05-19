@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import base64
+import io
+from PIL import Image
 from os import environ
 from re import sub
 from codecs import encode
@@ -9,7 +11,7 @@ from peewee import InternalError
 from werkzeug.routing import BuildError
 
 from forms import SignUpForm, PostForm, SignInForm
-from models import User, Post, Comment, Relationship, DoesNotExist, DB
+from models import User, Post, Comment, Relationship, DoesNotExist, DB, del_user
 
 from werkzeug.exceptions import BadRequest
 from flask import Flask, flash, redirect, url_for, render_template, g, abort, request
@@ -60,6 +62,12 @@ def index(page=1):
     form = PostForm()
     if form.validate_on_submit():
         file_u = request.files['image'].read()
+        image = Image.open(io.BytesIO(file_u))
+        scale = 1024 / image.size[0]
+        image = image.resize((int(image.size[0] * scale), int(image.size[1] * scale)), Image.ANTIALIAS)
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format="PNG")
+        file_u = img_byte_arr.getvalue()
         if request.files['image']:
             file_a = 'data:{};base64,{}'.format(request.files['image'].content_type,
                                                 encode(file_u, 'base64').decode('utf-8'))
@@ -284,6 +292,12 @@ def settings():
         if request.files['avatar']:
             if 'image' in request.files['avatar'].content_type:
                 file_u = request.files['avatar'].read()
+                image = Image.open(io.BytesIO(file_u))
+                scale = 200 / image.size[0]
+                image = image.resize((int(image.size[0] * scale), int(image.size[1] * scale)), Image.ANTIALIAS)
+                img_byte_arr = io.BytesIO()
+                image.save(img_byte_arr, format="PNG")
+                file_u = img_byte_arr.getvalue()
                 if getsizeof(file_u) <= 3000000:
                     file_a = 'data:{};base64,{}'.format(request.files['avatar'].content_type,
                                                         encode(file_u, 'base64').decode('utf-8'))
@@ -310,7 +324,7 @@ def settings():
 @app.route('/delete_account')
 @login_required
 def delete_account():
-    g.user.delete_instance()
+    del_user(g.user.username)
     logout_user()
     flash('User deleted. We are sorry to see you go!')
     return redirect(url_for('index'))

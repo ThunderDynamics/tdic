@@ -189,7 +189,9 @@ def del_comments_for_user(username):
 
 def del_relationships_for_user(username):
     for rel in Relationship.select():
-        if rel.to_user.username == username or rel.from_user.username == username:
+        if rel.to_user.username == username:
+            rel.delete_instance()
+        elif rel.from_user.username == username:
             rel.delete_instance()
 
 
