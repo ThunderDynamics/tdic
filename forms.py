@@ -1,5 +1,4 @@
 import os
-from base64 import encode
 
 from sys import getsizeof
 
@@ -121,5 +120,7 @@ class SignInForm(Form):
 
 
 class PostForm(Form):
-    content = TextAreaField('What do you have to say?', validators=[Length(1, 255)])
-    image = FileField('Optional Image', validators=[valid_image])
+    content = TextAreaField('What do you have to say?', validators=[Length(1, 255)],
+                            render_kw={'class': 'materialize-textarea',
+                            'data-length': '255'})
+    image = FileField('Optional Image (Up to 3 MB)', validators=[valid_image])

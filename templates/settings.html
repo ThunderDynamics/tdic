@@ -4,11 +4,12 @@
 <div class="container">
 	<div class="card">
         <div class="card-content">
+            <h3 class="black-text">Settings</h3>
             <div class="row">
                 <form method='POST' enctype='multipart/form-data' class="col s12">
                     <div class="row">
                         <div class="input-field col s12">
-                            <label for="bio">Set bio (Up to 255 chars)</label>
+                            <label for="bio">Bio</label>
                             <textarea name="bio"
                                       placeholder='Current bio: {{ g.user._get_current_object().bio }}'
                                       id="bio" class="materialize-textarea black-text"
@@ -19,7 +20,7 @@
 
                     <div class="row">
                         <div class="input-field col s12">
-                            <p class="grey-text">Set avatar (Up to 3mb)</p>
+                            <p class="grey-text">Avatar (Up to 3 MB)</p>
                             <div class="file-field input-field">
                               <div class="btn blue waves-effect waves-light">
                                 <span>File</span>

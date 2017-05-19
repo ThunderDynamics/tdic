@@ -8,21 +8,19 @@
                     <p class="red-text" style="font-size: 11px;">{{ error }}</p>
                 {% endfor %}
             {% endif %}
-            {% if field.type == 'TextAreaField' %}
-                {{ field(class='materialize-textarea black-text', **{'data-length': '255'}) }}
-            {% elif field.type == 'FileField' %}
+            {% if field.type == 'FileField' %}
                 <h6 class="grey-text">{{ field.label.text }}</h6>
                 <div class="file-field input-field">
                     <div class="btn blue waves-effect waves-light">
                         <span>Image</span>
-                        {{ field(class='black-text') }}
+                        {{ field() }}
                     </div>
                     <div class="file-path-wrapper">
                         <input class="file-path validate black-text" type="text">
                     </div>
                 </div>
             {% else %}
-                {{ field(class='black-text') }}
+                {{ field() }}
             {% endif %}
             {% if field.type not in ['CSRFTokenField', 'FileField'] %}
                 <label for="{{ field.id }}">{{ field.label.text }}</label>
