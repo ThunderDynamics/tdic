@@ -22,9 +22,9 @@
 			<p class='col s3'>Followers: {{ user.relations_to.count() }}</p>
 			{% if user != g.user._get_current_object() %}
 				{% if user not in current_user.following() %}
-					<a href="{{ url_for('follow', username=user.username) }}" class='col s2 btn blue waves-effect waves-light'>Follow</a>
+					<a href="{{ url_for('follow', username=user.username) }}" class='col s12 m2 l2 btn blue waves-effect waves-light'>Follow</a>
 				{% else %}
-					<a href="{{ url_for('unfollow', username=user.username) }}" class='col s2 btn blue waves-effect waves-light'>Unfollow</a>
+					<a href="{{ url_for('unfollow', username=user.username) }}" class='col s12 m2 l2 btn blue waves-effect waves-light'>Unfollow</a>
 				{% endif %}
 			{% endif %}
 		</div>
